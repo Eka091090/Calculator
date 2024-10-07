@@ -7,32 +7,69 @@ internal class Calculator : ICalc
 
     public int Result = 0;
 
-    private Stack<int> Results = new Stack<int>();
+    private Stack<int> results = new Stack<int>();
+
+    private Stack<CalcActionLog> actions = new Stack<CalcActionLog>();
 
     public void Sum(int value1, int value2)
     {
-        Results.Push(Result);
+        long temp;
+        if(value1 > value2)
+            temp = value1 + Result;
+        else
+            temp = value2 + Result;
+        if (temp >= int.MaxValue)
+        {
+            actions.Push(new CalcActionLog(CalcAction.Substruct, value1, value2));
+            throw new CalculateOperationCauseOverflowException("Overflow", actions);
+        }
+        results.Push(Result);
         Result = value1 + value2;
         RaiseEvent();
     }
 
     public void Substruct(int value1, int value2)
     {
-        Results.Push(Result);
+        long temp;
+        if(value1 < value2)
+            temp = Result - value1;
+        else
+            temp = Result - value2;
+        if (temp <= int.MinValue)
+        {
+            actions.Push(new CalcActionLog(CalcAction.Substruct, value1, value2));
+            throw new CalculateOperationCauseOverflowException("Overflow", actions);
+        }
+        results.Push(Result);
         Result = value1 - value2;
         RaiseEvent();
     }
 
     public void Multiply(int value1, int value2)
     {
-        Results.Push(Result);
+        long temp;
+        if(value1 > value2)
+            temp = value1 * Result;
+        else
+            temp = value2 * Result;
+        if (temp >= int.MaxValue)
+        {
+            actions.Push(new CalcActionLog(CalcAction.Substruct, value1, value2));
+            throw new CalculateOperationCauseOverflowException("Overflow", actions);
+        }
+        results.Push(Result);
         Result = value1 * value2;
         RaiseEvent();
     }
 
     public void Divide(int value1, int value2)
     {
-        Results.Push(Result);
+        if (value2 == 0)    
+        {
+            actions.Push(new CalcActionLog(CalcAction.Substruct, value1, value2));
+            throw new CalculatorDivideByZeroException("Divide by zero", actions);
+        }
+        results.Push(Result);
         Result = value1 / value2;
         RaiseEvent();
     }
@@ -44,9 +81,9 @@ internal class Calculator : ICalc
 
     public void CancelLast()
     {
-        if (Results.Count > 0)
+        if (results.Count > 0)
             {
-            Result = Results.Pop();
+            Result = results.Pop();
             RaiseEvent();
             }
     }

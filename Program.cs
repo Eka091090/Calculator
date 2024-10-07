@@ -9,9 +9,24 @@ class Program
         System.Console.WriteLine($"Result = {((Calculator)sendler).Result}");
     }
 
+    static void Execute (Action<int> action)
+    {
+        try
+        {
+            action.Invoke(5);
+        }
+        catch (CalculatorDivideByZeroException ex)
+        {
+            System.Console.WriteLine(ex);
+        }
+        catch (CalculateOperationCauseOverflowException ex)
+        {
+            System.Console.WriteLine(ex);
+        }
+    }
+
     static void Main()
     {
-
         ICalc calc = new Calculator();
 
         calc.GotResult += Calculator_GotResult;
@@ -48,7 +63,7 @@ class Program
                 switch(action.Key.GetHashCode())
                 {
                     case 187:
-                        calc.Sum(value1, value2);
+                    calc.Sum(value1, value2);
                         break;
                     case 189:
                         calc.Substruct(value1, value2);
